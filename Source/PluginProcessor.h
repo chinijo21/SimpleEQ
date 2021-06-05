@@ -54,11 +54,19 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
     //AudioProcessor Name{who?, undo?, Parameters, Parameters Layout} we need to give him 
     //all the parameters
-    static juce::AudioProcessorValueTreeState::ParameterLayout
-        createParameterLayout();
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState audioPro{ *this, nullptr, "Parameters", createParameterLayout()};
 
 private:
+    //Sets aliases for filters
+    using Filter = juce::dsp::IIR::Filter<float>;
+    using cutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter, Filter, Filter, Filter, Filter>;
+
+    //highPass, LowPass, Peak, Shelf, Notch
+    // Mono Chain: low -> parametric -> highCut x2 to have stereo
+    using monoChain = juce::dsp::ProcessorChain<cutFilter, Filter, cutFilter>;
+    monoChain left, right;
+    
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleEQAudioProcessor)
 };

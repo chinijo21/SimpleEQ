@@ -95,6 +95,18 @@ void SimpleEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+
+    //get the filter ready
+    juce::dsp::ProcessSpec sets;
+    sets.maximumBlockSize = samplesPerBlock;
+    sets.numChannels = 1;
+    sets.sampleRate = sampleRate;
+
+    left.prepare(sets);
+    right.prepare(sets);
+
+
+
 }
 
 void SimpleEQAudioProcessor::releaseResources()
@@ -144,18 +156,21 @@ void SimpleEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer (channel);
-
+   
+        //requieres a proccesor context, we need an audiBlock instnce
+        // extract left and right channel from buffer (0,1)
         // ..do something to the data...
-    }
+    juce::dsp::AudioBlock<float> block(buffer);
+    
+    auto leftBlock = block.getSingleChannelBlock(0);
+    auto rightBlock = block.getSingleChannelBlock(1);
+
+    //Create a context for both sides
+    juce::dsp::ProcessContextReplacing<float> leftContext(leftBlock);
+    juce::dsp::ProcessContextReplacing<float> rightContext(rightBlock);
+
+    left.process(leftContext);
+    right.process(rightContext);
 }
 
 //==============================================================================
