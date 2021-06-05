@@ -56,7 +56,7 @@ public:
     //all the parameters
     static juce::AudioProcessorValueTreeState::ParameterLayout
         createParameterLayout();
-    juce::AudioProcessorValueTreeState audioPro{ *this, nullptr, "Parameters", createParameterLayout(};
+    juce::AudioProcessorValueTreeState audioPro{ *this, nullptr, "Parameters", createParameterLayout()};
 
 private:
     //==============================================================================

@@ -188,7 +188,7 @@ SimpleEQAudioProcessor::createParameterLayout(){
     //Low Cut, HighCut and Bell
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     //Hearing range 20hz-20khz
-    //LowCut                                                                                                           //fmin, fmax, incrementos, skew(response), start pos
+    //LowCut                                                                    //fmin, fmax, incrementos, skew(response), start pos
     layout.add(std::make_unique<juce::AudioParameterFloat>("LowCut Freq", 
                                                            "LowCut Freq",
                                                             juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 20.f));
@@ -207,7 +207,22 @@ SimpleEQAudioProcessor::createParameterLayout(){
                                                            "Peak Q",
                                                             juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f), 1.f));
 
-    //TODO:Bands for eq Cut 29:00
+    //TODO:Bands for eq Cut in dB/octv
+    //So we hve 8 options up to 96 dB/oct (brickwall) 
+    juce::StringArray bandCuts;
+    for (int i = 0; i < 8; i++) {
+        juce::String name;
+        name << (12 + i * 12);
+        name << "dB/oct";
+        bandCuts.add(name);
+    }
+
+    //Add choices for LowCut
+    layout.add(std::make_unique<juce::AudioParameterChoice>("Low Slope", "Low Slope", bandCuts, 0));
+    //Add choices for highCut
+    layout.add(std::make_unique<juce::AudioParameterChoice>("High Slope", "High Slope", bandCuts, 0));
+
+    return layout;
 }
 //==============================================================================
 // This creates new instances of the plugin..
