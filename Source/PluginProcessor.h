@@ -13,6 +13,20 @@
 //==============================================================================
 /**
 */
+
+//**Data structure representing all the parameters values
+struct ChainSets {
+    int lowSlope{ 0 };
+    int highSlope{ 0 };
+    float lowFreq{ 0 };
+    float highFreq{ 0 };
+    float peakFreq{ 0 };
+    float peakGain{ 0 };
+    float peakQ{ 0 };
+};
+//Helper function for giving us all the parameters in the struct above
+ChainSets getChainSets(juce::AudioProcessorValueTreeState& audioPro);
+
 class SimpleEQAudioProcessor  : public juce::AudioProcessor
 {
 public:
@@ -65,8 +79,9 @@ private:
     //highPass, LowPass, Peak, Shelf, Notch
     // Mono Chain: low -> parametric -> highCut x2 to have stereo
     using monoChain = juce::dsp::ProcessorChain<cutFilter, Filter, cutFilter>;
-    monoChain left, right;
+    monoChain leftChain, rightChain;
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleEQAudioProcessor)
 };
+ 

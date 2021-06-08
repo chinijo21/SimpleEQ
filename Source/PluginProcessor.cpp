@@ -102,8 +102,8 @@ void SimpleEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     sets.numChannels = 1;
     sets.sampleRate = sampleRate;
 
-    left.prepare(sets);
-    right.prepare(sets);
+    leftChain.prepare(sets);
+    rightChain.prepare(sets);
 
 
 
@@ -169,8 +169,8 @@ void SimpleEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     juce::dsp::ProcessContextReplacing<float> leftContext(leftBlock);
     juce::dsp::ProcessContextReplacing<float> rightContext(rightBlock);
 
-    left.process(leftContext);
-    right.process(rightContext);
+    leftChain.process(leftContext);
+    rightChain.process(rightContext);
 }
 
 //==============================================================================
@@ -181,7 +181,8 @@ bool SimpleEQAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SimpleEQAudioProcessor::createEditor()
 {
-    return new SimpleEQAudioProcessorEditor (*this);
+    //return new SimpleEQAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -197,6 +198,22 @@ void SimpleEQAudioProcessor::setStateInformation (const void* data, int sizeInBy
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
 }
+//Calls Struct and gets parameters
+ChainSets getChainSets(juce::AudioProcessorValueTreeState& audioPro) {
+    ChainSets settings;
+    //If we do audioPro.getParameter("LowCut Freq")->getValue() we'll get a normalized value and thats grosso
+    //So we use getRawParameterValue like:
+    settings.lowFreq = audioPro.getRawParameterValue("LowCut Freq")->load();
+    settings.peakFreq = audioPro.getRawParameterValue("Peak Freq")->load();
+    settings.highFreq = audioPro.getRawParameterValue("HighCut Freq")->load();
+    settings.peakGain = audioPro.getRawParameterValue("Peak Gain")->load();
+    settings.peakQ = audioPro.getRawParameterValue("Peak Q")->load();
+    settings.lowSlope = audioPro.getRawParameterValue("Low Slope")->load();
+    settings.highSlope = audioPro.getRawParameterValue("High Slope")->load();
+
+    return settings;
+
+}
 
 juce::AudioProcessorValueTreeState::ParameterLayout
 SimpleEQAudioProcessor::createParameterLayout(){
@@ -208,8 +225,8 @@ SimpleEQAudioProcessor::createParameterLayout(){
                                                            "LowCut Freq",
                                                             juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 20.f));
     //HighCut is the same as Low but we start 20kHz
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Freq",
-                                                           "Peak Freq",
+    layout.add(std::make_unique<juce::AudioParameterFloat>("HighCut Freq",
+                                                           "HighCut Freq",
                                                             juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 20000.f));
     //Peak cut we have a freq cut and dB gain/loss and the Q
     layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Freq",
