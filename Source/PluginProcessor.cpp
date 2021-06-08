@@ -105,8 +105,15 @@ void SimpleEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     leftChain.prepare(sets);
     rightChain.prepare(sets);
 
-
-
+    //Coefficients
+    auto chainSets = getChainSets(audioPro);
+    auto peakCoef = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, 
+                                                                        chainSets.peakFreq, 
+                                                                        chainSets.peakQ, 
+                                                                        juce::Decibels::decibelsToGain(chainSets.peakGain));
+    //Dref actual pek coeffiecients
+    *leftChain.get<chainPos::Peak>().coefficients = *peakCoef;
+    *rightChain.get<chainPos::Peak>().coefficients = *peakCoef;
 }
 
 void SimpleEQAudioProcessor::releaseResources()
@@ -156,7 +163,15 @@ void SimpleEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-   
+    //Coefficients
+    auto chainSets = getChainSets(audioPro);
+    auto peakCoef = juce::dsp::IIR::Coefficients<float>::makePeakFilter(getSampleRate(),
+                                                                        chainSets.peakFreq,
+                                                                        chainSets.peakQ,
+                                                                        juce::Decibels::decibelsToGain(chainSets.peakGain));
+    //Dref actual pek coeffiecients
+    *leftChain.get<chainPos::Peak>().coefficients = *peakCoef;
+    *rightChain.get<chainPos::Peak>().coefficients = *peakCoef;
         //requieres a proccesor context, we need an audiBlock instnce
         // extract left and right channel from buffer (0,1)
         // ..do something to the data...
