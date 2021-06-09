@@ -14,10 +14,21 @@
 /**
 */
 
+enum Slope {
+    s_12,
+    s_24,
+    s_36,
+    s_48,
+    s_60,
+    s_72,
+    s_84,
+    s_96
+
+};
 //**Data structure representing all the parameters values
 struct ChainSets {
-    int lowSlope{ 0 };
-    int highSlope{ 0 };
+    int lowSlope{ Slope::s_12 };
+    int highSlope{ Slope::s_12 };
     float lowFreq{ 0 };
     float highFreq{ 0 };
     float peakFreq{ 0 };
